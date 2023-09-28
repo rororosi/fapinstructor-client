@@ -4,6 +4,7 @@ import { MediaRequest, MediaResponse } from "@/types/Media";
 import { Severity } from "@/stores/notifications";
 import { createNotification } from "@/game/engine/notification";
 import { axios } from "@/lib/axios";
+import { searchRedGifs } from "@/api/redgifs/redgifs";
 
 const failedSubreddits: string[] = [];
 
@@ -40,6 +41,13 @@ export default async function fetchRedditPics(request: MediaRequest) {
       severity: Severity.ERROR,
     });
   });
+
+  for (const link of res.links) {
+    if (!(link.mediaType.toLowerCase() === "video" && link.sourceLink && link.directLink.includes("redgifs"))) return;
+    const i = res.links.indexOf(link);
+    const redGifID = link.directLink.split("/")[3].split("-")[0];
+    res.links[i] = await searchRedGifs(redGifID.toLowerCase());
+  }
 
   return res.links;
 }

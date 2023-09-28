@@ -10,7 +10,6 @@ import {
 import { GameConfig } from "@/configureStore";
 import { MediaLink } from "@/types/Media";
 import { getLocalMediaLinks } from "@/features/file-system";
-import { searchRedGifs } from "@/api/redgifs/redgifs";
 
 import fetchRedditPics from "../api/fetchRedditPics";
 
@@ -75,9 +74,6 @@ const MediaService = {
 
       getMediaLinks = async () => {
         const links: MediaLink[] = [];
-        if (gameConfig.redgifs?.length) {
-          links.push(...(await searchRedGifs(...gameConfig.redgifs)));
-        }
 
         if (gameConfig.subreddits?.length) {
           const redditLinks = await fetchRedditPics({
@@ -85,9 +81,7 @@ const MediaService = {
             limit: estimatedRequiredLinkCount,
             mediaTypes: gameConfig.imageType,
           });
-          if (redditLinks) {
-            links.push(...redditLinks);
-          }
+          if (redditLinks) links.push(...redditLinks);
         }
 
         return shuffle(links);

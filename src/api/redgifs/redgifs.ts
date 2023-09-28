@@ -28,20 +28,20 @@ function setAuthToken(token: string) {
   return sessionStorage.setItem(SESSION_STORAGE_REDGIF_TOKEN, token);
 }
 
-const instance = axios.create();
-instance.interceptors.request.use(async (request) => {
+async function instance<T>(url: string): Promise<T> {
   let token = getAuthToken();
   if (!token || isTokenExpired(token)) {
     token = await fetchAuthToken();
     setAuthToken(token);
   }
 
-  request.headers = {
+  const headers = {
     Authorization: `Bearer ${token}`,
   };
 
-  return request;
-});
+  const res = await fetch(url, { headers });
+  return res.json();
+}
 
 type RedGif = {
   id: string;
@@ -51,30 +51,19 @@ type RedGif = {
   };
 };
 
-type TagsResponse = {
-  tags: Array<{ name: string; count: number }>;
-};
-
-export async function getTags() {
-  const response = await instance<TagsResponse>(
-    `https://api.redgifs.com/v1/tags`
-  );
-
-  return response.data.tags.map((t) => t.name);
-}
 
 type SearchResponse = {
-  gifs: RedGif[];
+  gif: RedGif;
 };
 
-export async function searchRedGifs(...tags: string[]): Promise<MediaLink[]> {
+export async function searchRedGifs(id: string): Promise<MediaLink> {
   const response = await instance<SearchResponse>(
-    `https://api.redgifs.com/v2/gifs/search?search_text=${tags.join(",")}`
+    `https://api.redgifs.com/v2/gifs/${id}`
   );
 
-  return response.data.gifs.map((gif) => ({
+  return {
     mediaType: MediaType.Video,
-    sourceLink: `https://www.redgifs.com/watch/${gif.id}`,
-    directLink: gif.urls.hd,
-  }));
+    sourceLink: `https://www.redgifs.com/watch/${response.gif.id}`,
+    directLink: response.gif.urls.hd,
+  };
 }
