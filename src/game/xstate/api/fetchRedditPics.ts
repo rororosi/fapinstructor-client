@@ -43,7 +43,7 @@ export default async function fetchRedditPics(request: MediaRequest) {
   });
 
   for (const link of res.links) {
-    if (!(link.mediaType.toLowerCase() === "video" && link.sourceLink && link.directLink.includes("redgifs"))) return;
+    if (!(link.mediaType.toLowerCase() === "video" && link.sourceLink && link.directLink.includes("redgifs"))) continue;
     const i = res.links.indexOf(link);
     const redGifID = link.directLink.split("/")[3].split("-")[0];
     res.links[i] = await searchRedGifs(redGifID.toLowerCase());
