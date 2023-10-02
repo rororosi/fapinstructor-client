@@ -4,7 +4,7 @@ import { MediaRequest, MediaResponse } from "@/types/Media";
 import { Severity } from "@/stores/notifications";
 import { createNotification } from "@/game/engine/notification";
 import { axios } from "@/lib/axios";
-import { searchRedGifs } from "@/api/redgifs/redgifs";
+import { resolveRedgifsLinks } from "@/api/redgifs/redgifs";
 
 const failedSubreddits: string[] = [];
 
@@ -51,5 +51,4 @@ export default async function fetchRedditPics(request: MediaRequest) {
 
   return [...links, ...redGifLinks];
 
-  return res.links;
 }
