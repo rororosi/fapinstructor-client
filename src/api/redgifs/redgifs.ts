@@ -67,3 +67,22 @@ export async function searchRedGifs(id: string): Promise<MediaLink> {
     directLink: response.gif.urls.hd,
   };
 }
+
+// Asynchronously resolve signed urls for redgif links.
+export async function resolveRedgifsLinks(redGifLinks: MediaLink[]) {
+  const redgifsSignedLinksPromise = await Promise.allSettled(
+    redGifLinks.map((link) => {
+      const redGifID = link.directLink.split("/")[3].split("-")[0];
+      return searchRedGifs(redGifID.toLowerCase());
+    })
+  );
+
+  const redgifsSignedLinks = redgifsSignedLinksPromise
+    .filter(
+      (linkPromise): linkPromise is { status: "fulfilled"; value: MediaLink } =>
+        linkPromise.status === "fulfilled"
+    )
+    .map((link) => link.value);
+
+  return redgifsSignedLinks;
+}
